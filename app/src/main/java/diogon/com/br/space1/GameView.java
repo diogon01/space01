@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -90,6 +91,11 @@ public class GameView extends SurfaceView implements Runnable {
         //Atualizando a coordenada do inimigo em relação à velocidade da nave(Jogador)
         for (int i = 0; i< enemyCount; i++){
             enemies[i].update(player.getSpeed());
+            //Verificando se os inimigos colidiram com a nave(Jogador)
+            if(Rect.intersects(player.getDetectCollision(),enemies[i].getDetectCollision())){
+                //Move o inimigo na margem esquerda
+                enemies[i].setX(-200);
+            }
         }
 
     }

@@ -3,6 +3,7 @@ package diogon.com.br.space1;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 
 /**
  * Created by diogo on 17/06/17.
@@ -26,6 +27,9 @@ public class Player {
     private final int MIN_SPEED = 1;
     private final int MAX_SPEED = 20;
 
+    //Atributo retangulo, responsável pela colisão
+    private Rect detectCollision;
+
 
 
     public Player(Context context, int screenX, int screenY){
@@ -43,6 +47,10 @@ public class Player {
         minY = 0;
 
         boosting = false;
+
+
+        //Inicializando o retangulo de colisão do jogador
+        detectCollision =  new Rect(x, y, bitmap.getWidth(), bitmap.getHeight());
 
     }
 
@@ -80,6 +88,18 @@ public class Player {
             y = maxY;
         }
 
+        //Atualiza os pontos de colisão do jogador: Esquerdo, Direito, Em cima, Baixo;
+        detectCollision.left = x;
+        detectCollision.top = y;
+        detectCollision.right = x + bitmap.getWidth();
+        detectCollision.bottom = y + bitmap.getHeight();
+
+    }
+
+
+    //Adicionando o geter do retangulo de colisão
+    public Rect getDetectCollision() {
+        return detectCollision;
     }
 
     public Bitmap getBitmap() {

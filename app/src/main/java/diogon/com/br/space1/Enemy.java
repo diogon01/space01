@@ -82,8 +82,24 @@ public class Enemy {
 
         }
 
-        //Atualiza os pontos de colisão dos inimigos
+        //Atualiza os pontos de colisão dos inimigos: Esquerdo, Direito, Em cima, Baixo;
+        detectCollision.left = x;
+        detectCollision.top = y;
+        detectCollision.right = x + bitmap.getWidth();
+        detectCollision.bottom = y + bitmap.getHeight();
+
     }
+
+    //Adicionando um seter no X, ele será usado a pós as colisões
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    //Montado o geter do retangulo que  trata a colisão
+    public Rect getDetectCollision() {
+        return detectCollision;
+    }
+
 
     public Bitmap getBitmap() {
         return bitmap;
