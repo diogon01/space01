@@ -18,9 +18,10 @@ public class GameView extends SurfaceView implements Runnable {
     //Variável boleana que indica se o player está jogando
     volatile boolean playing;
 
-    //the game thread
+    //Definindo o Thread do jogo
     private Thread gameThread = null;
 
+    //Definindo a nave como player(Jogador)
     private Player player;
 
     private Paint paint;
@@ -28,8 +29,11 @@ public class GameView extends SurfaceView implements Runnable {
     private SurfaceHolder surfaceHolder;
 
 
-    //Adicionando array de inimigos
-    private  Enemy[] enemies;
+    //Definindo a array de inimigos
+    private Enemy[] enemies;
+
+    //Definindo a explosão do jogo
+    private Boom boom;
 
     //Adiciona 3 inimigos no começo do jogo
     private int enemyCount = 3;
@@ -51,37 +55,44 @@ public class GameView extends SurfaceView implements Runnable {
         //Adicionando cem estrelas no começo do jogo
         int starNums = 100;
         for (int i = 0; i < starNums; i++) {
-            Star s  = new Star(screenX, screenY);
+            Star s = new Star(screenX, screenY);
             stars.add(s);
         }
 
         //Inicializando a Array de inimigos
         enemies = new Enemy[enemyCount];
-        for(int i = 0; i < enemyCount; i++){
+        for (int i = 0; i < enemyCount; i++) {
             enemies[i] = new Enemy(context, screenX, screenY);
         }
+
+        //Inicialização da explosão no jogo
+        boom = new Boom(context);
 
     }
 
     @Override
     public void run() {
+        //Mecanica do jogo, enquando o aplicativo esta ativo(RUN) o While é TRU
         while (playing) {
-            //to update the frame 
+            //Atualização do jogo
             update();
 
-            //to draw the frame 
+            //Desenho que vão ser adicionado no loop
             draw();
 
-            //to control 
+            //Controle(Joystick) do jogador
             control();
         }
 
     }
 
     private void update() {
-
         //Atualiza de acordo o metodo update do jogador
         player.update();
+
+        //Setando a explosão fora da tela do jogo
+        boom.setX(-250);
+        boom.setY(-250);
 
         // Atualizando as estrelas de acordo com a velocidade da nave(Jogador)
         for (Star s : stars) {
@@ -89,10 +100,15 @@ public class GameView extends SurfaceView implements Runnable {
         }
 
         //Atualizando a coordenada do inimigo em relação à velocidade da nave(Jogador)
-        for (int i = 0; i< enemyCount; i++){
+        for (int i = 0; i < enemyCount; i++) {
             enemies[i].update(player.getSpeed());
             //Verificando se os inimigos colidiram com a nave(Jogador)
-            if(Rect.intersects(player.getDetectCollision(),enemies[i].getDetectCollision())){
+            if (Rect.intersects(player.getDetectCollision(), enemies[i].getDetectCollision())) {
+
+                //Mostra as explosões na posição onde o inimigo se encontra
+                boom.setX(enemies[i].getX());
+                boom.setY(enemies[i].getY());
+
                 //Move o inimigo na margem esquerda
                 enemies[i].setX(-200);
             }
@@ -114,6 +130,7 @@ public class GameView extends SurfaceView implements Runnable {
                 canvas.drawPoint(s.getX(), s.getY(), paint);
             }
 
+            //Desenhando a nave(Jogador)
             canvas.drawBitmap(
                     player.getBitmap(),
                     player.getX(),
@@ -122,7 +139,7 @@ public class GameView extends SurfaceView implements Runnable {
             );
 
             //Desenhando os inimigos
-            for (int i = 0; i < enemyCount; i++){
+            for (int i = 0; i < enemyCount; i++) {
                 canvas.drawBitmap(
                         enemies[i].getBitmap(),
                         enemies[i].getX(),
@@ -130,6 +147,14 @@ public class GameView extends SurfaceView implements Runnable {
                         paint
                 );
             }
+
+            //Desenhando a explosão
+            canvas.drawBitmap(
+                    boom.getBitmap(),
+                    boom.getX(),
+                    boom.getY(),
+                    paint
+            );
 
 
             surfaceHolder.unlockCanvasAndPost(canvas);
