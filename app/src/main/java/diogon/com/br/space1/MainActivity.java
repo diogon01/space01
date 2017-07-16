@@ -11,9 +11,11 @@ import android.widget.ImageButton;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
-    //image button
+    //Botão de start do jogo
     private ImageButton buttonPlay;
 
+    //Botão dos Records
+    private ImageButton buttonScore;
 
 
     @Override
@@ -27,6 +29,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //getting the button
         buttonPlay = (ImageButton) findViewById(R.id.buttonPlay);
 
+        //get no Botão dos Escores
+        buttonScore = (ImageButton) findViewById(R.id.buttonScore);
+
+        //Adicionando Listener no botão do Score
+        buttonScore.setOnClickListener(this);
+
         //adding a click listener
         buttonPlay.setOnClickListener(this);
 
@@ -35,7 +43,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View v) {
 
-        startActivity(new Intent(this,GameActivity.class));
+        if (v == buttonPlay) {
+            //Transição da Main Activity para o Game View
+            startActivity(new Intent(MainActivity.this, GameActivity.class));
+        } else if (v == buttonScore) {
+            //Transição da Main Activity para a View HighScore Activity
+            startActivity(new Intent(MainActivity.this, HighScore.class));
+        }
 
     }
 }
