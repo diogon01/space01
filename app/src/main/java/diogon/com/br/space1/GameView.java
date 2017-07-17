@@ -1,11 +1,15 @@
 package diogon.com.br.space1;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.media.MediaPlayer;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MotionEvent;
@@ -13,6 +17,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import java.util.ArrayList;
+
 
 public class GameView extends SurfaceView implements Runnable {
 
@@ -68,9 +73,22 @@ public class GameView extends SurfaceView implements Runnable {
     //Shared Prefernces to store the High Scores
     SharedPreferences sharedPreferences;
 
+    //Declarando os sons do jogo
+    static MediaPlayer gameOnSound;
+    final MediaPlayer killedEnemysound;
+    final MediaPlayer gameOversound;
+
+    //Declarando o contexto
+    Context context;
+
+
     //Class constructor
     public GameView(Context context, int screenX, int screenY) {
         super(context);
+
+        gameOnSound = MediaPlayer.create(context, R.raw.gameon);
+        this.killedEnemysound = MediaPlayer.create(context, R.raw.killedenemy);
+        this.gameOversound = MediaPlayer.create(context, R.raw.gameover);
 
         //Seta o placar para zero no começo do jogo
         score = 0;
@@ -108,6 +126,11 @@ public class GameView extends SurfaceView implements Runnable {
 
         //Inicialização da classe do amigo
         friend = new Friend(context, screenX, screenY);
+
+        //Inicializando a música do jogo
+        gameOnSound.start();
+
+        this.context = context;
 
     }
 
@@ -155,8 +178,14 @@ public class GameView extends SurfaceView implements Runnable {
             //Carrega a imagem de explosão
             boom.setX(enemies.getX());
             boom.setY(enemies.getY());
+
+            //Adicionando som de que matou inimigo
+            killedEnemysound.start();
+
             //will play a sound at the collision between player and the enemy
             enemies.setX(-200);
+
+
         } else {
             // se o inimigo acabou de entrar
             if (flag) {
@@ -174,9 +203,14 @@ public class GameView extends SurfaceView implements Runnable {
                         playing = false;
                         isGameOver = true;
 
+                        //Parando a música do jogo
+                        gameOnSound.stop();
+                        //Inicia a música de game over
+                        gameOversound.start();
+
                         //Atualizando as novas pontuações na Array de Escores
-                        for(int i = 0; i < 4; ++i){
-                            if(highScore[i] < score){
+                        for (int i = 0; i < 4; ++i) {
+                            if (highScore[i] < score) {
                                 final int finalI = i;
                                 highScore[i] = score;
                                 break;
@@ -185,9 +219,9 @@ public class GameView extends SurfaceView implements Runnable {
 
                         // armazenando as pontuações através de preferências compartilhadas
                         SharedPreferences.Editor e = sharedPreferences.edit();
-                        for(int i = 0; i < 4; i++){
+                        for (int i = 0; i < 4; i++) {
                             int j = i + 1;
-                            e.putInt("score"+j,highScore[i]);
+                            e.putInt("score" + j, highScore[i]);
                         }
                         e.apply();
                     }
@@ -208,9 +242,14 @@ public class GameView extends SurfaceView implements Runnable {
             //Muda pra game over e finaliza o jogo
             isGameOver = true;
 
+            //Parando a música do jogo
+            gameOnSound.stop();
+            //Inicia a música de game over
+            gameOversound.start();
+
             // Atribuindo as pontuações à matriz de números de pontuação elevada
-            for(int i = 0; i < 4; i++){
-                if(highScore[i] < score){
+            for (int i = 0; i < 4; i++) {
+                if (highScore[i] < score) {
 
                     final int finalI = i;
                     highScore[i] = score;
@@ -219,9 +258,9 @@ public class GameView extends SurfaceView implements Runnable {
             }
             // Armazenando as pontuações através de preferências compartilhadas
             SharedPreferences.Editor e = sharedPreferences.edit();
-            for(int i=0; i < 4; i++){
-                int j = i+1;
-                e.putInt("score"+j,highScore[i]);
+            for (int i = 0; i < 4; i++) {
+                int j = i + 1;
+                e.putInt("score" + j, highScore[i]);
             }
             e.apply();
         }
@@ -244,7 +283,7 @@ public class GameView extends SurfaceView implements Runnable {
 
             //Desenhando o placar do jogador
             paint.setTextSize(30);
-            canvas.drawText("Score" + score,100,50,paint);
+            canvas.drawText("Score" + score, 100, 50, paint);
 
             //Desenhando a nave(Jogador)
             canvas.drawBitmap(
@@ -319,6 +358,11 @@ public class GameView extends SurfaceView implements Runnable {
         gameThread.start();
     }
 
+    //stop the music on exit
+    public static void stopMusic(){
+        gameOnSound.stop();
+    }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent motionEvent) {
@@ -334,7 +378,15 @@ public class GameView extends SurfaceView implements Runnable {
                 player.setBoosting();
                 break;
         }
+        //Se acabou o jogo a tela te manda para a MainActive
+        if(isGameOver){
+            if (motionEvent.getAction() == MotionEvent.ACTION_DOWN){
+                context.startActivity(new Intent(context, MainActivity.class));
+            }
+        }
+
         return true;
     }
+
 
 }
